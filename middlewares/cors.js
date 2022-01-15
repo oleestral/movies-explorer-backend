@@ -3,8 +3,8 @@ const corses = [
   'https://localhost:3000',
   'http://localhost:3001',
   'https://localhost:3001',
-  'https://oleestral.movies.nomoredomains.rocks',
-  'http://oleestral.movies.nomoredomains.rocks',
+  'https://oleestral.diploma.nomoredomains.rocks',
+  'http://oleestral.diploma.nomoredomains.rocks',
 ];
 
 module.exports = (req, res, next) => {
