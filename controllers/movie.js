@@ -1,6 +1,7 @@
 const movie = require('../models/movie');
 const NotFound = require('../errors/NotFound');
 const BadRequest = require('../errors/BadRequest');
+const Conflict = require('../errors/Conflict');
 
 module.exports.createMovie = (req, res, next) => {
   const {
@@ -25,10 +26,9 @@ module.exports.createMovie = (req, res, next) => {
     .then((item) => res.send({ data: item }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequest('Ошибка при создании фильма'));
-      } else {
-        next(err);
+        return next(new BadRequest('Ошибка при создании фильма'));
       }
+      return next(err);
     });
 };
 module.exports.deleteMovie = (req, res, next) => {
@@ -36,25 +36,24 @@ module.exports.deleteMovie = (req, res, next) => {
     .findById(req.params.movieId)
     .orFail(new NotFound('Нет фильма по заданному id'))
     .then((item) => {
-      if (req.user._id !== item.owner.toString()) {
-        next(new Error('Нельзя удалять чужие фильмы!'));
-      } else {
-        item.remove();
-        res.status(200).send({ message: 'Фильм успешно удален!' });
+      if (req.user._id === item.owner.toString()) {
+        return item.remove().then(() => {
+          res.status(200).send({ message: 'Фильм успешно удален!' });
+        });
       }
+      throw new Conflict('Нельзя удалять чужие фильмы!');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequest('Нет фильма по заданному id'));
-      } else {
-        next(err);
       }
+      next(err);
     });
 };
 
-module.exports.getMovies = (req, res) => {
+module.exports.getMovies = (req, res, next) => {
   movie
     .find({ owner: req.user._id })
     .then((item) => res.send({ data: item }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка при получении фильмов' }));
+    .catch((err) => next(err));
 };

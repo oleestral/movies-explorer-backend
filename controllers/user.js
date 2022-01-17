@@ -10,18 +10,10 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .then((item) => {
-      if (!item) {
-        next(new NotFound('Нет пользователя по заданному id'));
-      }
-      return res.status(200).send(item);
-    })
+    .orFail(new new NotFound('Нет пользователя по заданному id')())
+    .then((item) => res.status(200).send(item))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequest('Неверный id пользователя'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 module.exports.updateUserInfo = (req, res, next) => {
@@ -38,12 +30,13 @@ module.exports.updateUserInfo = (req, res, next) => {
     .then((item) => res.send({ data: item }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequest('Нет пользователя по заданному id'));
-      } else if (err.name === 'ValidationError') {
-        next(new BadRequest('Данные некорректны'));
-      } else {
-        next(err);
+        return next(new BadRequest('Нет пользователя по заданному id'));
+      } if (err.name === 'ValidationError') {
+        return next(new BadRequest('Данные некорректны'));
+      } if (err.code === 11000) {
+        return next(new Conflict('Ошибка при обновлении данных! Проверьте правильность ввода данных!'));
       }
+      return next(err);
     });
 };
 module.exports.registration = (req, res, next) => {
@@ -69,10 +62,9 @@ module.exports.registration = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            next(new BadRequest('Данные некорректны'));
-          } else {
-            next(err);
+            return next(new BadRequest('Данные некорректны'));
           }
+          return next(err);
         });
     });
 };
@@ -96,5 +88,8 @@ module.exports.login = (req, res, next) => {
           })
           .catch(next);
       }
+    })
+    .catch((err) => {
+      next(err);
     });
 };
