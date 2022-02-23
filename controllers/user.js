@@ -10,7 +10,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(new new NotFound('Нет пользователя по заданному id')())
+    .orFail(new NotFound('Нет пользователя по заданному id'))
     .then((item) => res.status(200).send(item))
     .catch((err) => {
       next(err);
