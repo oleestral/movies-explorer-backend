@@ -33,7 +33,7 @@ module.exports.createMovie = (req, res, next) => {
 };
 module.exports.deleteMovie = (req, res, next) => {
   movie
-    .findById(req.params.movieId)
+    .findById(req.params.id)
     .orFail(new NotFound('Нет фильма по заданному id'))
     .then((item) => {
       if (req.user._id === item.owner.toString()) {
