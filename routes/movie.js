@@ -8,7 +8,7 @@ const {
 
 movieRouter.get('/movies', getMovies);
 movieRouter.delete(
-  '/movies/:movieId',
+  '/movies/:id',
   celebrate({
     params: Joi.object().keys({
       id: Joi.string().length(24).hex(),
