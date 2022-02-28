@@ -23,7 +23,7 @@ module.exports.createMovie = (req, res, next) => {
       nameEN,
       owner: req.user._id,
     })
-    .then((item) => res.send({ data: item }))
+    .then((item) => res.send(item))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new BadRequest('Ошибка при создании фильма'));
